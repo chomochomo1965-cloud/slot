@@ -8,69 +8,76 @@
 <style>
 
 body{
-  text-align:center;
-  font-family:sans-serif;
-  background:linear-gradient(#fff5f5,#ffecec);
-  margin:0;
+text-align:center;
+font-family:sans-serif;
+background:linear-gradient(#fff5f5,#ffecec);
+margin:0;
 }
 
 h1{
-  font-size:36px;
-  color:#b30000;
-  margin-top:20px;
-  text-shadow:1px 1px 2px gold;
+font-size:36px;
+color:#b30000;
+margin-top:20px;
+text-shadow:1px 1px 2px gold;
+}
+
+.arrow{
+font-size:40px;
+color:red;
+margin-top:10px;
 }
 
 .slot{
-  display:flex;
-  justify-content:center;
-  margin:40px auto;
+display:flex;
+justify-content:center;
+margin:10px auto 30px auto;
 }
 
 .reel{
-  font-size:56px;
-  width:110px;
-  height:90px;
-  margin:0 5px;
-  border:2px solid red;
-  border-radius:10px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  background:#fff0f0;
-  box-shadow:0 0 10px red inset;
+font-size:54px;
+width:130px;
+height:100px;
+margin:0 6px;
+border:3px solid red;
+border-radius:12px;
+display:flex;
+align-items:center;
+justify-content:center;
+background:#fff0f0;
+box-shadow:0 0 12px red inset;
+overflow:hidden;
 }
 
 button{
-  font-size:26px;
-  padding:15px 40px;
-  margin-top:20px;
-  background:#d60000;
-  color:white;
-  border:none;
-  border-radius:10px;
-  cursor:pointer;
-  box-shadow:0 0 10px gold;
+font-size:26px;
+padding:15px 40px;
+margin-top:20px;
+background:#d60000;
+color:white;
+border:none;
+border-radius:10px;
+cursor:pointer;
+box-shadow:0 0 10px gold;
 }
 
 #result{
-  font-size:32px;
-  margin-top:20px;
-  color:#b30000;
-  white-space: pre-line;
-  text-shadow:1px 1px 2px gold;
+font-size:32px;
+margin-top:20px;
+color:#b30000;
+white-space: pre-line;
+text-shadow:1px 1px 2px gold;
 }
 
 .win{
-  font-size:40px;
-  color:gold;
-  animation:flash 0.4s infinite;
+font-size:42px;
+color:gold;
+animation:flash 0.3s infinite;
 }
 
 @keyframes flash{
-0%{color:gold;}
-50%{color:red;}
-100%{color:gold;}
+0%{background:white;}
+50%{background:gold;}
+100%{background:white;}
 }
 
 </style>
@@ -79,6 +86,8 @@ button{
 <body>
 
 <h1>🎰 ゆうみのスロット 🎰</h1>
+
+<div class="arrow">▼ ▼ ▼</div>
 
 <div class="slot">
 <div id="reel1" class="reel">❔</div>
@@ -95,82 +104,103 @@ button{
 
 <script>
 
-// 絵柄7種類
-const symbols = ["𝟕","𝟑","🍒","BAR","🔔","💎","🍉"];
+const symbols=["𝟕","𝟑","🍒","BAR","🔔","💎","🍉"];
+
+function drawSymbol(symbol){
+
+if(symbol==="𝟕"){
+return `<span style="display:block;width:100%;background:white;color:red;text-align:center;padding:6px 0;font-weight:bold;border:3px solid red;border-radius:6px;font-size:80px">𝟕</span>`;
+}
+
+if(symbol==="𝟑"){
+return `<span style="color:blue;font-weight:bold;font-size:80px">𝟑</span>`;
+}
+if(symbol==="BAR"){
+return `<span style="background:black;color:white;padding:6px 16px;border-radius:6px;border:2px solid red;font-weight:bold">BAR</span>`;
+}
+
+return symbol;
+
+}
 
 function spin(){
 
-const reels=[
+let reels=[
 document.getElementById("reel1"),
 document.getElementById("reel2"),
 document.getElementById("reel3")
 ];
 
-const click=document.getElementById("click");
+let result=[];
+let click=document.getElementById("click");
 
-let count=0;
+document.getElementById("result").innerText="";
 
-const interval=setInterval(()=>{
-
-for(let i=0;i<3;i++){
-
-const symbol=symbols[Math.floor(Math.random()*symbols.length)];
-
-if(symbol==="𝟕"){
-reels[i].innerHTML=`<span style="color:red;font-weight:bold">${symbol}</span>`;
-}
-else if(symbol==="𝟑"){
-reels[i].innerHTML=`<span style="color:blue;font-weight:bold">${symbol}</span>`;
-}
-else{
-reels[i].innerHTML=symbol;
-}
-
-}
-
+let spin1=setInterval(()=>{
+let s=symbols[Math.floor(Math.random()*symbols.length)];
+reels[0].innerHTML=drawSymbol(s);
 click.currentTime=0;
 click.play();
+},80);
 
-count++;
+let spin2=setInterval(()=>{
+let s=symbols[Math.floor(Math.random()*symbols.length)];
+reels[1].innerHTML=drawSymbol(s);
+click.currentTime=0;
+click.play();
+},80);
 
-if(count>20){
+let spin3=setInterval(()=>{
+let s=symbols[Math.floor(Math.random()*symbols.length)];
+reels[2].innerHTML=drawSymbol(s);
+click.currentTime=0;
+click.play();
+},80);
 
-clearInterval(interval);
+setTimeout(()=>{
+clearInterval(spin1);
+result[0]=reels[0].innerText;
+},1200);
 
-const res=reels.map(r=>r.innerText);
+setTimeout(()=>{
+clearInterval(spin2);
+result[1]=reels[1].innerText;
+},1800);
 
-let message="";
+setTimeout(()=>{
+clearInterval(spin3);
+result[2]=reels[2].innerText;
+judge(result);
+},2400);
+
+}
+
+function judge(res){
+
 let result=document.getElementById("result");
-result.className="";
 
 if(res[0]==="𝟕" && res[1]==="𝟕" && res[2]==="𝟕"){
 
-message="✨✨✨ BIG BONUS 𝟕𝟕𝟕 ✨✨✨";
 result.className="win";
+result.innerText="✨✨✨ 𝟕𝟕𝟕 BIG BONUS ✨✨✨";
 document.getElementById("win").play();
 
 }
 else if(res.includes("🍒")){
 
-message="🍒 チェリー小当たり！";
+result.innerText="🍒 チェリー小当たり！";
 
 }
 else if(res[0]===res[1] || res[1]===res[2] || res[0]===res[2]){
 
-message="ラッキー！ペア揃い😊";
+result.innerText="ラッキー！ペア揃い😊";
 
 }
 else{
 
-message="はずれ…😢";
+result.innerText="はずれ…";
 
 }
-
-result.innerText=message;
-
-}
-
-},100);
 
 }
 
@@ -178,3 +208,5 @@ result.innerText=message;
 
 </body>
 </html>
+
+
