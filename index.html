@@ -45,13 +45,25 @@ h1{
 button{
   font-size:26px;
   padding:15px 40px;
-  margin:10px 10px 20px 10px;
+  margin:10px;
   background:#d60000;
   color:white;
   border:none;
   border-radius:10px;
   cursor:pointer;
   box-shadow:0 0 10px gold;
+}
+#pointFrame{
+  font-size:28px;
+  margin:20px auto;
+  padding:10px;
+  width:320px;
+  border:3px solid red;
+  border-radius:12px;
+  background:#fff0f0;
+  color:#b30000;
+  text-shadow:1px 1px 2px gold;
+  white-space: pre-line;
 }
 #result{
   font-size:28px;
@@ -84,10 +96,16 @@ button{
   <div id="reel3" class="reel">❔</div>
 </div>
 
-<button onclick="spin()">スピン</button>
-<button onclick="resetPoints()">累計POINTリセット</button>
-
+<!-- リザルトメッセージ -->
 <div id="result"></div>
+
+<!-- POINT外枠（累計＋今回獲得POINT） -->
+<div id="pointFrame">累計POINT：0\n今回獲得POINT：0</div>
+
+<!-- 操作ボタン -->
+<button onclick="buyPoints()">POINT購入</button>
+<button onclick="resetPoints()">累計POINTリセット</button>
+<button onclick="spin()">スピン</button>
 
 <audio id="win" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_115b9b0c67.mp3"></audio>
 <audio id="click" src="https://actions.google.com/sounds/v1/alarms/clock_ticking.ogg"></audio>
@@ -95,35 +113,36 @@ button{
 <script>
 const symbols=["𝟕","𝟑","🍒","BAR","🔔","💎","🍉"];
 const triplePoints = {
-  "𝟕": 300,
-  "𝟑": 150,
+  "𝟕": 200,
+  "𝟑":100,
   "🍒": 30,
-  "BAR": 150,
+  "BAR":100,
   "🔔": 40,
   "💎": 60,
   "🍉": 20
 };
 
-// localStorageから累計POINT読み込み（なければ50）
-let totalPoint = parseInt(localStorage.getItem("totalPoint")) || 50;
+// localStorageから累計POINT読み込み
+let totalPoint = parseInt(localStorage.getItem("totalPoint")) || 0;
+updatePointFrame(0);
 
 // 図柄描画
 function drawSymbol(symbol){
-  if(symbol==="𝟕"){
-    return `<span style="display:block;width:100%;background:white;color:red;text-align:center;padding:6px 0;font-weight:bold;border:3px solid red;border-radius:6px;font-size:85px">𝟕</span>`;
-  }
-  if(symbol==="𝟑"){
-    return `<span style="color:blue;font-weight:bold;font-size:85px">𝟑</span>`;
-  }
-  if(symbol==="BAR"){
-    return `<span style="background:black;color:white;padding:6px 16px;border-radius:6px;border:2px solid red;font-weight:bold;font-size:40px">BAR</span>`;
-  }
+  if(symbol==="𝟕") return `<span style="display:block;width:100%;background:white;color:red;text-align:center;padding:6px 0;font-weight:bold;border:3px solid red;border-radius:6px;font-size:85px">𝟕</span>`;
+  if(symbol==="𝟑") return `<span style="color:blue;font-weight:bold;font-size:85px">𝟑</span>`;
+  if(symbol==="BAR") return `<span style="background:black;color:white;padding:6px 16px;border-radius:6px;border:2px solid red;font-weight:bold;font-size:40px">BAR</span>`;
   return `<span style="font-size:60px">${symbol}</span>`;
+}
+
+// POINT枠表示更新（累計 + 今回獲得）
+function updatePointFrame(lastPoint){
+  document.getElementById("pointFrame").innerText = `累計POINT：${totalPoint}\n今回獲得POINT：${lastPoint}`;
 }
 
 // スピン処理
 function spin(){
-  totalPoint -= 10; // 1回スピンごとに3POINT消費
+  totalPoint -= 10; // 3POINT消費
+  updatePointFrame(0);
 
   let reels = [
     document.getElementById("reel1"),
@@ -131,7 +150,7 @@ function spin(){
     document.getElementById("reel3")
   ];
 
-  let result = [];
+  let resultArr = [];
   let click = document.getElementById("click");
   document.getElementById("result").innerText="";
 
@@ -155,18 +174,18 @@ function spin(){
 
   setTimeout(()=>{
     clearInterval(spin1);
-    result[0] = reels[0].innerText;
+    resultArr[0] = reels[0].innerText;
   },1200);
 
   setTimeout(()=>{
     clearInterval(spin2);
-    result[1] = reels[1].innerText;
+    resultArr[1] = reels[1].innerText;
   },1800);
 
   setTimeout(()=>{
     clearInterval(spin3);
-    result[2] = reels[2].innerText;
-    judge(result);
+    resultArr[2] = reels[2].innerText;
+    judge(resultArr);
   },2400);
 }
 
@@ -195,19 +214,30 @@ function judge(res){
   else{
     point = 0;
     result.className="";
-    result.innerText="はずれ😫";
+    result.innerText="はずれ…😫";
   }
 
   totalPoint += point;
-  localStorage.setItem("totalPoint", totalPoint); // 保存
-  result.innerText += `\n今回獲得POINT：${point}\n累計POINT：${totalPoint}`;
+  localStorage.setItem("totalPoint", totalPoint);
+
+  // 外枠に今回獲得POINTと累計POINTを反映
+  updatePointFrame(point);
 }
 
 // 累計POINTリセット
 function resetPoints(){
   totalPoint = 0;
   localStorage.setItem("totalPoint", totalPoint);
-  document.getElementById("result").innerText="累計POINTをリセットしました。\n累計POINT：0";
+  updatePointFrame(0);
+  document.getElementById("result").innerText="累計POINTをリセットしました。";
+}
+
+// POINT購入 +50
+function buyPoints(){
+  totalPoint += 50;
+  localStorage.setItem("totalPoint", totalPoint);
+  updatePointFrame(0);
+  document.getElementById("result").innerText="POINTを購入しました。\n累計POINT：50追加！";
 }
 </script>
 
