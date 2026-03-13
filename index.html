@@ -96,13 +96,10 @@ button{
   <div id="reel3" class="reel">❔</div>
 </div>
 
-<!-- リザルトメッセージ -->
 <div id="result"></div>
 
-<!-- POINT外枠（累計＋今回獲得POINT） -->
 <div id="pointFrame">累計POINT：0\n今回獲得POINT：0</div>
 
-<!-- 操作ボタン（POINT購入ボタンを削除） -->
 <button onclick="resetPoints()">累計POINTリセット</button>
 <button onclick="spin()">スピン</button>
 
@@ -125,7 +122,6 @@ const triplePoints = {
 let totalPoint = parseInt(localStorage.getItem("totalPoint")) || 0;
 updatePointFrame(0);
 
-// 図柄描画
 function drawSymbol(symbol){
   if(symbol==="𝟕") return `<span style="display:block;width:100%;background:white;color:red;text-align:center;padding:6px 0;font-weight:bold;border:3px solid red;border-radius:6px;font-size:85px">𝟕</span>`;
   if(symbol==="𝟑") return `<span style="color:blue;font-weight:bold;font-size:85px">𝟑</span>`;
@@ -133,14 +129,12 @@ function drawSymbol(symbol){
   return `<span style="font-size:60px">${symbol}</span>`;
 }
 
-// POINT枠表示更新（累計 + 今回獲得）
 function updatePointFrame(lastPoint){
   document.getElementById("pointFrame").innerText = `累計POINT：${totalPoint}\n今回獲得POINT：${lastPoint}`;
 }
 
 // スピン処理
 function spin(){
-  // 3POINT消費（マイナスでも可）
   totalPoint -= 10;
   updatePointFrame(0);
 
@@ -154,42 +148,34 @@ function spin(){
   let click = document.getElementById("click");
   document.getElementById("result").innerText="";
 
-  let spin1=setInterval(()=>{
+  function spinReel(reel){
     let s = symbols[Math.floor(Math.random()*symbols.length)];
-    reels[0].innerHTML = drawSymbol(s);
+    reel._symbol = s; // ★ここでシンボルを保持
+    reel.innerHTML = drawSymbol(s);
     click.currentTime = 0; click.play();
-  },80);
+  }
 
-  let spin2=setInterval(()=>{
-    let s = symbols[Math.floor(Math.random()*symbols.length)];
-    reels[1].innerHTML = drawSymbol(s);
-    click.currentTime = 0; click.play();
-  },80);
-
-  let spin3=setInterval(()=>{
-    let s = symbols[Math.floor(Math.random()*symbols.length)];
-    reels[2].innerHTML = drawSymbol(s);
-    click.currentTime = 0; click.play();
-  },80);
+  let spin1 = setInterval(()=>spinReel(reels[0]), 80);
+  let spin2 = setInterval(()=>spinReel(reels[1]), 80);
+  let spin3 = setInterval(()=>spinReel(reels[2]), 80);
 
   setTimeout(()=>{
     clearInterval(spin1);
-    resultArr[0] = reels[0].innerText;
-  },1200);
+    resultArr[0] = reels[0]._symbol;
+  }, 1200);
 
   setTimeout(()=>{
     clearInterval(spin2);
-    resultArr[1] = reels[1].innerText;
-  },1800);
+    resultArr[1] = reels[1]._symbol;
+  }, 1800);
 
   setTimeout(()=>{
     clearInterval(spin3);
-    resultArr[2] = reels[2].innerText;
+    resultArr[2] = reels[2]._symbol;
     judge(resultArr);
-  },2400);
+  }, 2400);
 }
 
-// 判定とポイント計算
 function judge(res){
   let result = document.getElementById("result");
   let point = 0;
@@ -219,12 +205,9 @@ function judge(res){
 
   totalPoint += point;
   localStorage.setItem("totalPoint", totalPoint);
-
-  // 外枠に今回獲得POINTと累計POINTを反映
   updatePointFrame(point);
 }
 
-// 累計POINTリセット
 function resetPoints(){
   totalPoint = 0;
   localStorage.setItem("totalPoint", totalPoint);
@@ -235,4 +218,3 @@ function resetPoints(){
 
 </body>
 </html>
-
