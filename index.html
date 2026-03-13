@@ -6,96 +6,86 @@
 <title>🎰 ゆうみのスロット 🎰</title>
 
 <style>
-
 body{
-text-align:center;
-font-family:sans-serif;
-background:linear-gradient(#fff5f5,#ffecec);
-margin:0;
+  text-align:center;
+  font-family:sans-serif;
+  background:linear-gradient(#fff5f5,#ffecec);
+  margin:0;
 }
-
 h1{
-font-size:36px;
-color:#b30000;
-margin-top:20px;
-text-shadow:1px 1px 2px gold;
+  font-size:36px;
+  color:#b30000;
+  margin-top:20px;
+  text-shadow:1px 1px 2px gold;
 }
-
 .arrow{
-font-size:40px;
-color:red;
-margin-top:10px;
+  font-size:40px;
+  color:red;
+  margin-top:10px;
 }
-
 .slot{
-display:flex;
-justify-content:center;
-margin:10px auto 30px auto;
+  display:flex;
+  justify-content:center;
+  margin:10px auto 30px auto;
 }
-
 .reel{
-font-size:54px;
-width:140px;
-height:110px;
-margin:0 6px;
-border:3px solid red;
-border-radius:12px;
-display:flex;
-align-items:center;
-justify-content:center;
-background:#fff0f0;
-box-shadow:0 0 12px red inset;
-overflow:hidden;
+  font-size:54px;
+  width:140px;
+  height:110px;
+  margin:0 6px;
+  border:3px solid red;
+  border-radius:12px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:#fff0f0;
+  box-shadow:0 0 12px red inset;
+  overflow:hidden;
 }
-
 button{
-font-size:26px;
-padding:15px 40px;
-margin-top:20px;
-background:#d60000;
-color:white;
-border:none;
-border-radius:10px;
-cursor:pointer;
-box-shadow:0 0 10px gold;
+  font-size:26px;
+  padding:15px 40px;
+  margin:10px 10px 20px 10px;
+  background:#d60000;
+  color:white;
+  border:none;
+  border-radius:10px;
+  cursor:pointer;
+  box-shadow:0 0 10px gold;
 }
-
 #result{
-font-size:32px;
-margin-top:20px;
-color:#b30000;
-white-space: pre-line;
-text-shadow:1px 1px 2px gold;
+  font-size:28px;
+  margin-top:20px;
+  color:#b30000;
+  white-space: pre-line;
+  text-shadow:1px 1px 2px gold;
 }
-
 .win{
-font-size:42px;
-color:gold;
-animation:flash 0.3s infinite;
+  font-size:38px;
+  color:gold;
+  animation:flash 0.3s infinite;
 }
-
 @keyframes flash{
-0%{background:white;}
-50%{background:gold;}
-100%{background:white;}
+  0%{background:white;}
+  50%{background:gold;}
+  100%{background:white;}
 }
-
 </style>
 </head>
 
 <body>
 
 <h1>🎰 ゆうみのスロット 🎰</h1>
-
 <div class="arrow">▼ ▼ ▼</div>
 
 <div class="slot">
-<div id="reel1" class="reel">❔</div>
-<div id="reel2" class="reel">❔</div>
-<div id="reel3" class="reel">❔</div>
+  <div id="reel1" class="reel">❔</div>
+  <div id="reel2" class="reel">❔</div>
+  <div id="reel3" class="reel">❔</div>
 </div>
 
 <button onclick="spin()">スピン</button>
+<button onclick="resetPoints()">累計POINTリセット</button>
 
 <div id="result"></div>
 
@@ -103,113 +93,123 @@ animation:flash 0.3s infinite;
 <audio id="click" src="https://actions.google.com/sounds/v1/alarms/clock_ticking.ogg"></audio>
 
 <script>
-
 const symbols=["𝟕","𝟑","🍒","BAR","🔔","💎","🍉"];
+const triplePoints = {
+  "𝟕": 300,
+  "𝟑": 150,
+  "🍒": 30,
+  "BAR": 150,
+  "🔔": 40,
+  "💎": 60,
+  "🍉": 20
+};
 
+// localStorageから累計POINT読み込み（なければ50）
+let totalPoint = parseInt(localStorage.getItem("totalPoint")) || 50;
+
+// 図柄描画
 function drawSymbol(symbol){
-
-if(symbol==="𝟕"){
-return `<span style="display:block;width:100%;background:white;color:red;text-align:center;padding:6px 0;font-weight:bold;border:3px solid red;border-radius:6px;font-size:85px">𝟕</span>`;
+  if(symbol==="𝟕"){
+    return `<span style="display:block;width:100%;background:white;color:red;text-align:center;padding:6px 0;font-weight:bold;border:3px solid red;border-radius:6px;font-size:85px">𝟕</span>`;
+  }
+  if(symbol==="𝟑"){
+    return `<span style="color:blue;font-weight:bold;font-size:85px">𝟑</span>`;
+  }
+  if(symbol==="BAR"){
+    return `<span style="background:black;color:white;padding:6px 16px;border-radius:6px;border:2px solid red;font-weight:bold;font-size:40px">BAR</span>`;
+  }
+  return `<span style="font-size:60px">${symbol}</span>`;
 }
 
-if(symbol==="𝟑"){
-return `<span style="color:blue;font-weight:bold;font-size:85px">𝟑</span>`;
-}
-
-if(symbol==="BAR"){
-return `<span style="background:black;color:white;padding:6px 16px;border-radius:6px;border:2px solid red;font-weight:bold;font-size:40px">BAR</span>`;
-}
-
-return `<span style="font-size:60px">${symbol}</span>`;
-
-}
-
+// スピン処理
 function spin(){
+  totalPoint -= 10; // 1回スピンごとに3POINT消費
 
-let reels=[
-document.getElementById("reel1"),
-document.getElementById("reel2"),
-document.getElementById("reel3")
-];
+  let reels = [
+    document.getElementById("reel1"),
+    document.getElementById("reel2"),
+    document.getElementById("reel3")
+  ];
 
-let result=[];
-let click=document.getElementById("click");
+  let result = [];
+  let click = document.getElementById("click");
+  document.getElementById("result").innerText="";
 
-document.getElementById("result").innerText="";
+  let spin1=setInterval(()=>{
+    let s = symbols[Math.floor(Math.random()*symbols.length)];
+    reels[0].innerHTML = drawSymbol(s);
+    click.currentTime = 0; click.play();
+  },80);
 
-let spin1=setInterval(()=>{
-let s=symbols[Math.floor(Math.random()*symbols.length)];
-reels[0].innerHTML=drawSymbol(s);
-click.currentTime=0;
-click.play();
-},80);
+  let spin2=setInterval(()=>{
+    let s = symbols[Math.floor(Math.random()*symbols.length)];
+    reels[1].innerHTML = drawSymbol(s);
+    click.currentTime = 0; click.play();
+  },80);
 
-let spin2=setInterval(()=>{
-let s=symbols[Math.floor(Math.random()*symbols.length)];
-reels[1].innerHTML=drawSymbol(s);
-click.currentTime=0;
-click.play();
-},80);
+  let spin3=setInterval(()=>{
+    let s = symbols[Math.floor(Math.random()*symbols.length)];
+    reels[2].innerHTML = drawSymbol(s);
+    click.currentTime = 0; click.play();
+  },80);
 
-let spin3=setInterval(()=>{
-let s=symbols[Math.floor(Math.random()*symbols.length)];
-reels[2].innerHTML=drawSymbol(s);
-click.currentTime=0;
-click.play();
-},80);
+  setTimeout(()=>{
+    clearInterval(spin1);
+    result[0] = reels[0].innerText;
+  },1200);
 
-setTimeout(()=>{
-clearInterval(spin1);
-result[0]=reels[0].innerText;
-},1200);
+  setTimeout(()=>{
+    clearInterval(spin2);
+    result[1] = reels[1].innerText;
+  },1800);
 
-setTimeout(()=>{
-clearInterval(spin2);
-result[1]=reels[1].innerText;
-},1800);
-
-setTimeout(()=>{
-clearInterval(spin3);
-result[2]=reels[2].innerText;
-judge(result);
-},2400);
-
+  setTimeout(()=>{
+    clearInterval(spin3);
+    result[2] = reels[2].innerText;
+    judge(result);
+  },2400);
 }
 
+// 判定とポイント計算
 function judge(res){
+  let result = document.getElementById("result");
+  let point = 0;
 
-let result=document.getElementById("result");
+  if(res[0] === res[1] && res[1] === res[2]){
+    let symbol = res[0];
+    point = triplePoints[symbol] || 0;
+    result.className = "win";
+    result.innerText = `✨✨✨ ${symbol}${symbol}${symbol} BIG BONUS ✨✨✨`;
+    document.getElementById("win").play();
+  }
+  else if(res.includes("🍒")){
+    point = 10;
+    result.className="";
+    result.innerText="🍒 チェリー小当たり！";
+  }
+  else if(res[0]===res[1] || res[1]===res[2] || res[0]===res[2]){
+    point = 20;
+    result.className="";
+    result.innerText="ラッキー！ペア揃い😊";
+  }
+  else{
+    point = 0;
+    result.className="";
+    result.innerText="はずれ😫";
+  }
 
-if(res[0]==="𝟕" && res[1]==="𝟕" && res[2]==="𝟕"){
-
-result.className="win";
-result.innerText="✨✨✨ 𝟕𝟕𝟕 BIG BONUS ✨✨✨";
-document.getElementById("win").play();
-
+  totalPoint += point;
+  localStorage.setItem("totalPoint", totalPoint); // 保存
+  result.innerText += `\n今回獲得POINT：${point}\n累計POINT：${totalPoint}`;
 }
-else if(res.includes("🍒")){
 
-result.className="";
-result.innerText="🍒 チェリー小当たり！";
-
+// 累計POINTリセット
+function resetPoints(){
+  totalPoint = 0;
+  localStorage.setItem("totalPoint", totalPoint);
+  document.getElementById("result").innerText="累計POINTをリセットしました。\n累計POINT：0";
 }
-else if(res[0]===res[1] || res[1]===res[2] || res[0]===res[2]){
-
-result.className="";
-result.innerText="ラッキー！ペア揃い😊";
-
-}
-else{
-
-result.className="";
-result.innerText="はずれ…";
-
-}
-
-}
-
 </script>
 
 </body>
 </html>
-
