@@ -112,10 +112,10 @@ button{
 <script>
 const symbols=["𝟕","𝟑","🍒","BAR","🔔","💎","🍉"];
 const triplePoints = {
-  "𝟕": 100,
-  "𝟑": 50,
+  "𝟕": 1000,
+  "𝟑": 500,
   "🍒": 30,
-  "BAR": 80,
+  "BAR": 500,
   "🔔": 40,
   "💎": 60,
   "🍉": 20
@@ -141,7 +141,7 @@ function updatePointFrame(lastPoint){
 // スピン処理
 function spin(){
   // 3POINT消費（マイナスでも可）
-  totalPoint -= 3;
+  totalPoint -= 10;
   updatePointFrame(0);
 
   let reels = [
@@ -235,3 +235,4 @@ function resetPoints(){
 
 </body>
 </html>
+
